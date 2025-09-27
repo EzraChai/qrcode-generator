@@ -7,6 +7,7 @@ import { ModeToggle } from "@/components/mode-toggle.tsx";
 import { Button } from "./components/ui/button";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, Download, QrCodeIcon } from "lucide-react";
+import { toast } from "sonner";
 
 function App() {
   const [text, setText] = useState("");
@@ -59,6 +60,7 @@ function App() {
           </div>
           <div className="flex gap-2 justify-start">
             <Button
+              className="cursor-pointer"
               disabled={!text}
               onClick={() => {
                 if (!svgRef.current) return;
@@ -92,6 +94,7 @@ function App() {
               <Download /> PNG
             </Button>
             <Button
+              className="cursor-pointer"
               disabled={!text}
               onClick={() => {
                 if (!svgRef.current) return;
@@ -115,6 +118,7 @@ function App() {
               SVG
             </Button>
             <Button
+              className="cursor-pointer"
               disabled={!text}
               onClick={async () => {
                 if (!svgRef.current) return;
@@ -122,7 +126,10 @@ function App() {
                 const svgData = new XMLSerializer().serializeToString(svg);
                 const canvas = document.createElement("canvas");
                 const ctx = canvas.getContext("2d");
-                if (!ctx) return;
+                if (!ctx) {
+                  toast.error("Failed to copy QR Code to clipboard.");
+                  return;
+                }
                 const img = new Image();
                 const svgBlob = new Blob([svgData], {
                   type: "image/svg+xml;charset=utf-8",
@@ -134,11 +141,16 @@ function App() {
                   ctx.drawImage(img, 0, 0, size[0], size[0]);
                   URL.revokeObjectURL(url);
                   canvas.toBlob(async (blob) => {
-                    if (!blob) return;
+                    if (!blob) {
+                      toast.error("Failed to copy QR Code to clipboard.");
+                      return;
+                    }
                     try {
                       await navigator.clipboard.write([
                         new window.ClipboardItem({ "image/png": blob }),
                       ]);
+                      toast.success("QR Code copied to clipboard!");
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     } catch (err) {
                       // fallback for browsers that don't support ClipboardItem
                       const reader = new FileReader();
@@ -147,6 +159,7 @@ function App() {
                         navigator.clipboard.writeText(dataUrl);
                       };
                       reader.readAsDataURL(blob);
+                      toast.success("QR Code copied to clipboard!");
                     }
                   }, "image/png");
                 };
