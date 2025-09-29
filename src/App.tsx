@@ -12,6 +12,7 @@ import { toast } from "sonner";
 function App() {
   const [text, setText] = useState("");
   const [size, setSize] = useState([256]);
+  const [marginSize, setMarginSize] = useState([2]);
   const svgRef = useRef<SVGSVGElement>(null);
 
   return (
@@ -55,9 +56,25 @@ function App() {
               </Label>
             </div>
           </div>
-          <div className="">
-            <Label></Label>
+          <div className="grid w-full max-w-sm items-center gap-3">
+            <Label htmlFor="size">Margin Size: {marginSize}</Label>
+            <Slider
+              value={marginSize}
+              onValueChange={(e) => setMarginSize(e)}
+              step={1}
+              min={1}
+              max={10}
+            />
+            <div className="flex justify-between">
+              <Label htmlFor="size" className="dark:text-neutral-400">
+                1
+              </Label>
+              <Label htmlFor="size" className="dark:text-neutral-400">
+                10
+              </Label>
+            </div>
           </div>
+
           <div className="flex gap-2 justify-start">
             <Button
               className="cursor-pointer"
@@ -146,9 +163,12 @@ function App() {
                       return;
                     }
                     try {
-                      await navigator.clipboard.write([
-                        new window.ClipboardItem({ "image/png": blob }),
-                      ]);
+                      console.log(blob);
+                      await navigator.clipboard
+                        .write([
+                          new window.ClipboardItem({ "image/png": blob }),
+                        ])
+                        .then();
                       toast.success("QR Code copied to clipboard!");
                       // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     } catch (err) {
@@ -180,7 +200,7 @@ function App() {
             size={size[0]}
             level="Q"
             title={`QR Code for "${text}"`}
-            marginSize={1}
+            marginSize={marginSize[0]}
           />
         </div>
       </div>
